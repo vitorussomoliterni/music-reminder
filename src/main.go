@@ -8,51 +8,67 @@ import (
 	"strings"
 )
 
+// Variables used for testing
+const artist string = "nofx"
+const baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
+
 func main() {
-	bandName := "nofx"
+	artistCleanedName := cleanArtistName(artist)
 
-	uri := "https://musicbrainz.org/ws/2/artist?query="
-	artistData := getHTTPResponse(uri + bandName)
-
-	artistList := ArtistList{}
-	err := xml.Unmarshal(artistData, &artistList)
+	searchResult, err := getHTTPResponse(baseArtistSearchURL + artistCleanedName)
 
 	if err != nil {
-		fmt.Println("Error:", err)
+		fmt.Println(err)
 	}
 
-	fmt.Println("Result:", artistList)
+	artists, err := getArtistList(searchResult)
+
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("Artists:", artists)
 }
 
-func getHTTPResponse(url string) []byte {
-	formattedURL := strings.Replace(url, " ", "%20", -1)
+func cleanArtistName(artist string) string {
+	return strings.Replace(artist, " ", "%20", -1)
+}
 
-	resp, err := http.Get(formattedURL)
+func getArtistList(xmlResponse []byte) ([]Artist, error) {
+	artistList := ArtistList{}
+	err := xml.Unmarshal(xmlResponse, &artistList)
+
 	if err != nil {
-		fmt.Println("Error getting a reponse:", err)
-		return nil
+		return nil, err
+	}
+
+	return artistList.Artists, nil
+}
+
+func getHTTPResponse(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, fmt.Errorf("GET error: %v", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error status not OK:", err)
-		return nil
+		return nil, fmt.Errorf("Status error: %v", resp.StatusCode)
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading response:", err)
-		return nil
+		return nil, fmt.Errorf("Read body: %v", err)
 	}
 
-	return data
+	return data, nil
 }
 
 type Artist struct {
-	Name  string `xml:"name"`
-	Ended bool   `xml:"life-span>ended"`
-	ID    string `xml:"id,attr"`
-	Score int32  `xml:"score,attr"`
+	Name        string `xml:"name"`
+	StillActive bool   `xml:"life-span>ended"`
+	ID          string `xml:"id,attr"`
+	SearchScore int32  `xml:"score,attr"`
 }
 
 type ArtistList struct {
