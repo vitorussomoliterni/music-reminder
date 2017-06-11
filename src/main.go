@@ -12,6 +12,7 @@ import (
 const (
 	artist              string = "nofx"
 	baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
+	userAgent           string = "Music_Reminder_Bot/0.1 ( https://github.com/vitorussomoliterni/music-reminder/ )"
 )
 
 func main() {
@@ -29,7 +30,9 @@ func main() {
 		fmt.Println(err)
 	}
 
-	fmt.Println("Artists:", artists)
+	artist := getBestArtistMatch(artists)
+
+	fmt.Println("Best match found:", artist.Name)
 }
 
 func cleanArtistName(artist string) string {
@@ -48,15 +51,20 @@ func getArtistList(xmlResponse []byte) ([]Artist, error) {
 }
 
 func getHTTPResponse(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+	client := &http.Client{}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("Fatal error: %v", err)
+	}
+
+	req.Header.Set("User-Agent", userAgent)
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("GET error: %v", err)
 	}
 	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Status error: %v", resp.StatusCode)
-	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -64,6 +72,16 @@ func getHTTPResponse(url string) ([]byte, error) {
 	}
 
 	return data, nil
+}
+
+func getBestArtistMatch(artists []Artist) Artist {
+	for _, a := range artists {
+		if a.SearchScore == 100 {
+			return a
+		}
+	}
+
+	return Artist{}
 }
 
 type Artist struct {
@@ -75,5 +93,4 @@ type Artist struct {
 
 type ArtistList struct {
 	Artists []Artist `xml:"artist-list>artist"`
-	Count   int32    `xml:"count,attr"`
 }
