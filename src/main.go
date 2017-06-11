@@ -9,8 +9,10 @@ import (
 )
 
 // Variables used for testing
-const artist string = "nofx"
-const baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
+const (
+	artist              string = "nofx"
+	baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
+)
 
 func main() {
 	artistCleanedName := cleanArtistName(artist)
