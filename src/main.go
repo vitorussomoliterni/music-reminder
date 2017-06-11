@@ -12,7 +12,7 @@ import (
 const (
 	artist              string = "the men"
 	baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
-	userAgent           string = "Music_Reminder_Bot/0.1 ( https://github.com/vitorussomoliterni/music-reminder/ )"
+	userAgent           string = "Musichino_Bot/0.1 ( https://github.com/vitorussomoliterni/musichino/ )"
 )
 
 func main() {
