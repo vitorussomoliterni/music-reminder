@@ -10,7 +10,7 @@ import (
 
 // Variables used for testing
 const (
-	artist              string = "nofx"
+	artist              string = "the men"
 	baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
 	userAgent           string = "Music_Reminder_Bot/0.1 ( https://github.com/vitorussomoliterni/music-reminder/ )"
 )
@@ -32,7 +32,7 @@ func main() {
 
 	artist := getBestArtistMatch(artists)
 
-	fmt.Println("Best match found:", artist.Name)
+	fmt.Println("Best match found:", beautifyArtistString(artist))
 }
 
 func cleanArtistName(artist string) string {
@@ -42,9 +42,12 @@ func cleanArtistName(artist string) string {
 func getArtistList(xmlResponse []byte) ([]Artist, error) {
 	artistList := ArtistList{}
 	err := xml.Unmarshal(xmlResponse, &artistList)
-
 	if err != nil {
 		return nil, err
+	}
+
+	if len(artistList.Artists) == 0 {
+		return nil, fmt.Errorf("no artist found")
 	}
 
 	return artistList.Artists, nil
@@ -84,11 +87,37 @@ func getBestArtistMatch(artists []Artist) Artist {
 	return Artist{}
 }
 
+func beautifyArtistString(artist Artist) string {
+	result := artist.Name
+
+	if len(artist.Area) > 0 {
+		result += " | " + artist.Area
+	}
+	if len(artist.ActivityBegin) > 0 {
+		result += " (" + artist.ActivityBegin
+	}
+	if artist.ActvityEnded && len(artist.ActivityEnd) > 0 {
+		result += " - " + artist.ActivityEnd
+	}
+	if len(artist.ActivityBegin) > 0 {
+		result += ")"
+	}
+	if len(artist.Disambiguation) > 0 {
+		result += " [" + artist.Disambiguation + "]"
+	}
+
+	return result
+}
+
 type Artist struct {
-	Name        string `xml:"name"`
-	StillActive bool   `xml:"life-span>ended"`
-	ID          string `xml:"id,attr"`
-	SearchScore int32  `xml:"score,attr"`
+	Name           string `xml:"name"`
+	Area           string `xml:"area>name"`
+	ActivityBegin  string `xml:"life-span>begin"`
+	ActivityEnd    string `xml:"life-span>end"`
+	ActvityEnded   bool   `xml:"life-span>ended"`
+	ID             string `xml:"id,attr"`
+	SearchScore    int32  `xml:"score,attr"`
+	Disambiguation string `xml:"disambiguation"`
 }
 
 type ArtistList struct {
