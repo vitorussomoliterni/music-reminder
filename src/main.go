@@ -30,9 +30,11 @@ func main() {
 		fmt.Println(err)
 	}
 
-	artist := getBestArtistMatch(artists)
-
-	fmt.Println("Best match found:", beautifyArtistString(artist))
+	bestMatches := getBestArtistMatches(artists)
+	fmt.Println("Best matches found:")
+	for _, a := range bestMatches {
+		fmt.Println(a.friendlyString())
+	}
 }
 
 func cleanArtistName(artist string) string {
@@ -77,17 +79,23 @@ func getHTTPResponse(url string) ([]byte, error) {
 	return data, nil
 }
 
-func getBestArtistMatch(artists []Artist) Artist {
-	for _, a := range artists {
-		if a.SearchScore == 100 {
-			return a
+func getBestArtistMatches(artists []Artist) []Artist {
+	results := make([]Artist, 2)
+
+	for i := range artists {
+		if artists[i].SearchScore == 100 {
+			results = append(results, artists[i])
 		}
 	}
 
-	return Artist{}
+	if len(results) > 1 { // If more than one result has a 100% score, return all results
+		return artists
+	}
+
+	return results
 }
 
-func beautifyArtistString(artist Artist) string {
+func (artist *Artist) friendlyString() string {
 	result := artist.Name
 
 	if len(artist.Area) > 0 {
