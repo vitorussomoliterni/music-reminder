@@ -10,7 +10,7 @@ import (
 const artist string = "the men"
 
 func main() {
-	artistBestMatches := services.queryartist.GetArtist(artist)
+	artistBestMatches := services.GetArtist(artist)
 	fmt.Println("Best matches found:")
 	for _, a := range artistBestMatches {
 		fmt.Println(a.friendlyString())

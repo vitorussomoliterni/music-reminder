@@ -1,4 +1,4 @@
-package queryartist
+package services
 
 import (
 	"encoding/xml"
