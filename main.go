@@ -2,8 +2,7 @@ package main
 
 import (
 	"fmt"
-
-	"github.com/vitorussomoliterni/musichino/services"
+	"musichino/src/services"
 )
 
 // Variables used for testing
@@ -13,6 +12,6 @@ func main() {
 	artistBestMatches := services.GetArtist(artist)
 	fmt.Println("Best matches found:")
 	for _, a := range artistBestMatches {
-		fmt.Println(a.friendlyString())
+		fmt.Println(a.FriendlyString())
 	}
 }
