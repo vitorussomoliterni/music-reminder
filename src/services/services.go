@@ -10,7 +10,6 @@ import (
 
 // Variables used for testing
 const (
-	artist              string = "the men"
 	baseArtistSearchURL string = "https://musicbrainz.org/ws/2/artist?query="
 	userAgent           string = "Musichino_Bot/0.1 ( https://github.com/vitorussomoliterni/musichino/ )"
 )
@@ -29,12 +28,6 @@ func GetArtist(artist string) []Artist {
 
 	if err != nil {
 		fmt.Println(err)
-	}
-
-	bestMatches := getBestArtistMatches(artists)
-	fmt.Println("Best matches found:")
-	for _, a := range bestMatches {
-		fmt.Println(a.friendlyString())
 	}
 
 	return artists
@@ -98,7 +91,8 @@ func getBestArtistMatches(artists []Artist) []Artist {
 	return results
 }
 
-func (artist *Artist) friendlyString() string {
+// FriendlyString return a readable string from an artist struct.
+func (artist Artist) FriendlyString() string {
 	result := artist.Name
 
 	if len(artist.Area) > 0 {
