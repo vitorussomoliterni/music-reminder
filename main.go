@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"musichino/src/services"
+	"musichino/services"
 )
 
 // Variables used for testing
